@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -130,7 +131,7 @@ public class MainActivity extends Activity {
 
             TextView emptyTitle = text("\u8fd8\u6ca1\u6709\u8054\u7cfb\u4eba", 26, true);
             emptyTitle.setGravity(Gravity.CENTER);
-            TextView emptyHint = text("\u957f\u6309\u9876\u90e8\u300c\u7b80\u547c\u300d3 \u79d2\u8fdb\u5165\u8bbe\u7f6e", 17, false);
+            TextView emptyHint = text("\u70b9\u51fb\u9876\u90e8\u300c\u7b80\u547c\u300d\u8fdb\u5165\u8bbe\u7f6e", 17, false);
             emptyHint.setGravity(Gravity.CENTER);
             emptyHint.setTextColor(Color.argb(180, 52, 58, 58));
             emptyBox.addView(emptyTitle, new LinearLayout.LayoutParams(
@@ -231,11 +232,7 @@ public class MainActivity extends Activity {
         ImageView avatar = new ImageView(this);
         avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
         avatar.setPadding(dp(8), dp(8), dp(8), dp(8));
-        if (contact.avatarUri != null && !contact.avatarUri.isEmpty()) {
-            avatar.setImageURI(Uri.parse(contact.avatarUri));
-        } else {
-            avatar.setImageDrawable(new InitialDrawable(contact.primaryName(), contact.avatarColor));
-        }
+        loadAvatarOrFallback(avatar, contact);
         avatar.setLayoutParams(new LinearLayout.LayoutParams(size, size));
         return avatar;
     }
@@ -362,6 +359,9 @@ public class MainActivity extends Activity {
         if (checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             startActivity(callIntent);
         } else {
+            Toast.makeText(this,
+                    "\u9700\u8981\u62e8\u53f7\u6743\u9650\uff0c\u7528\u4e8e\u76f4\u63a5\u547c\u53eb\u5bb6\u4eba",
+                    Toast.LENGTH_LONG).show();
             requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CALL_PERMISSION);
         }
     }
@@ -479,11 +479,7 @@ public class MainActivity extends Activity {
         ImageButton avatar = new ImageButton(this);
         avatar.setBackgroundColor(Color.TRANSPARENT);
         avatar.setBackground(new GlassDrawable(dp(48)));
-        if (contact.avatarUri != null && !contact.avatarUri.isEmpty()) {
-            avatar.setImageURI(Uri.parse(contact.avatarUri));
-        } else {
-            avatar.setImageDrawable(new InitialDrawable(contact.primaryName(), contact.avatarColor));
-        }
+        loadAvatarOrFallback(avatar, contact);
         avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
         avatarBox.addView(avatar, new LinearLayout.LayoutParams(dp(92), dp(92)));
 
@@ -643,6 +639,12 @@ public class MainActivity extends Activity {
                             Toast.LENGTH_LONG).show();
                     return false;
                 }
+                if (requireName && !refs.contact.phone.isEmpty() && !isValidPhone(refs.contact.phone)) {
+                    Toast.makeText(this,
+                            refs.contact.primaryName() + " \u7684\u53f7\u7801\u683c\u5f0f\u4e0d\u6b63\u786e",
+                            Toast.LENGTH_LONG).show();
+                    return false;
+                }
             }
         }
         return true;
@@ -654,10 +656,14 @@ public class MainActivity extends Activity {
         if (requestCode == REQUEST_PICK_AVATAR && resultCode == RESULT_OK && data != null && pendingAvatarContact != null) {
             Uri uri = data.getData();
             if (uri != null) {
-                int flags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                try {
-                    getContentResolver().takePersistableUriPermission(uri, flags);
-                } catch (SecurityException ignored) {
+                int flags = data.getFlags()
+                        & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                int readFlag = flags & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                if (readFlag != 0) {
+                    try {
+                        getContentResolver().takePersistableUriPermission(uri, readFlag);
+                    } catch (SecurityException ignored) {
+                    }
                 }
                 pendingAvatarContact.avatarUri = uri.toString();
                 settingsDirty = true;
@@ -670,6 +676,23 @@ public class MainActivity extends Activity {
         if (tts != null) {
             tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, "call");
         }
+    }
+
+    private void loadAvatarOrFallback(ImageView avatar, Contact contact) {
+        if (contact.avatarUri != null && !contact.avatarUri.isEmpty()) {
+            try {
+                Drawable drawable = Drawable.createFromStream(
+                        getContentResolver().openInputStream(Uri.parse(contact.avatarUri)),
+                        "avatar");
+                if (drawable != null) {
+                    avatar.setImageDrawable(drawable);
+                    return;
+                }
+            } catch (Exception ignored) {
+                contact.avatarUri = "";
+            }
+        }
+        avatar.setImageDrawable(new InitialDrawable(contact.primaryName(), contact.avatarColor));
     }
 
     private TextView text(String value, int size, boolean bold) {

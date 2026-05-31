@@ -11,12 +11,15 @@ This version uses native Android Java + Gradle. It does not use Kivy, Buildozer,
 - Large avatar, large contact title, and phone icon.
 - Whole card is tappable.
 - Tap a contact: TTS announces the call, a 1-second cancel dialog appears, then the app calls.
+- If `CALL_PHONE` permission is missing, the app explains why it is needed before requesting it.
 - If `CALL_PHONE` permission is denied, the app opens the system dialer.
 - If direct-call permission is denied, the app explains the fallback before opening the dialer.
-- Long-press the title for 3 seconds to enter Settings directly.
+- Tap the title to enter Settings directly.
 - Settings: add, delete, reorder, edit name, display name, phone number, and avatar.
 - Leaving Settings with unsaved edits shows a confirmation dialog.
 - Empty contact list shows an in-app setup hint.
+- Invalid phone numbers are blocked on save.
+- Broken avatar links automatically fall back to a default text avatar.
 - Contacts are stored locally as JSON.
 
 ## Build With GitHub Actions
@@ -62,7 +65,7 @@ app/build/outputs/apk/debug/app-debug.apk
 
 1. Install the APK.
 2. Open the app.
-3. Long-press the top title for 3 seconds to enter Settings directly.
+3. Tap the top title to enter Settings directly.
 4. Add or edit contacts.
 5. Use `Up` / `Down` to reorder contacts.
 6. Save and return to the main screen.
