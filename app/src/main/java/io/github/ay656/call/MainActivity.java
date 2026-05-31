@@ -15,7 +15,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,11 +35,9 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private static final int REQUEST_CALL_PERMISSION = 10;
     private static final int REQUEST_PICK_AVATAR = 20;
-    private static final long HOLD_TO_SETTINGS_MS = 3000L;
     private static final long CALL_DELAY_MS = 1000L;
 
     private static final String APP_TITLE = "\u7b80\u547c";
-    private static final String HOLDING_TITLE = "\u7ee7\u7eed\u957f\u6309";
     private static final String FOOTER_IDLE = "\u8f7b\u70b9\u5bb6\u4eba\u5373\u53ef\u62e8\u6253";
     private static final String TAP_TO_CALL = "\u8f7b\u70b9\u5373\u53ef\u547c\u53eb";
     private static final String NO_NUMBER_SPEAK = "\u53f7\u7801\u8fd8\u6ca1\u6709\u8bbe\u7f6e\uff0c\u8bf7\u8ba9\u5bb6\u4eba\u5e2e\u5fd9\u8bbe\u7f6e\u3002";
@@ -50,7 +46,6 @@ public class MainActivity extends Activity {
     };
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Runnable openSettingsRunnable = this::showSettings;
 
     private ContactStore store;
     private List<Contact> contacts = new ArrayList<>();
@@ -64,17 +59,6 @@ public class MainActivity extends Activity {
     private boolean inSettings = false;
     private boolean settingsDirty = false;
     private boolean bindingEditors = false;
-
-    private ProgressBar holdProgress;
-    private final Runnable holdProgressTick = new Runnable() {
-        @Override
-        public void run() {
-            if (holdProgress != null) {
-                holdProgress.setProgress(holdProgress.getProgress() + (holdProgress.getMax() / 60));
-                handler.postDelayed(this, 50);
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +76,6 @@ public class MainActivity extends Activity {
     private void showMain() {
         inSettings = false;
         settingsDirty = false;
-        handler.removeCallbacks(openSettingsRunnable);
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackground(new MistBackgroundDrawable());
@@ -114,38 +97,9 @@ public class MainActivity extends Activity {
         title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         root.addView(title, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(64)));
+                dp(74)));
 
-        holdProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        holdProgress.setMax((int) HOLD_TO_SETTINGS_MS);
-        holdProgress.setProgress(0);
-        holdProgress.setVisibility(View.INVISIBLE);
-        holdProgress.setProgressDrawable(new android.graphics.drawable.ColorDrawable(
-                Color.argb(140, 180, 190, 200)));
-        root.addView(holdProgress, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(4)));
-
-        title.setOnTouchListener((view, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                title.setText(HOLDING_TITLE);
-                holdProgress.setProgress(0);
-                holdProgress.setVisibility(View.VISIBLE);
-                holdProgress.getProgressDrawable().setAlpha(140);
-                handler.post(holdProgressTick);
-                handler.postDelayed(openSettingsRunnable, HOLD_TO_SETTINGS_MS);
-                return true;
-            }
-            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                title.setText(APP_TITLE);
-                holdProgress.setVisibility(View.INVISIBLE);
-                handler.removeCallbacks(holdProgressTick);
-                handler.removeCallbacks(openSettingsRunnable);
-                return true;
-            }
-            return true;
-        });
+        title.setOnClickListener(view -> showSettings());
 
         ScrollView scrollView = new ScrollView(this);
         scrollView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
@@ -431,9 +385,6 @@ public class MainActivity extends Activity {
     private void showSettings() {
         inSettings = true;
         settingsDirty = false;
-        handler.removeCallbacks(openSettingsRunnable);
-        handler.removeCallbacks(holdProgressTick);
-        holdProgress = null;
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackground(new MistBackgroundDrawable());
