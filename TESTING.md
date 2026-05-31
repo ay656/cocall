@@ -1,12 +1,17 @@
-# 测试清单
+# Test Checklist
 
-- GitHub Actions 能生成 `app-debug.apk`。
-- 首次打开显示默认联系人卡片。
-- 长按标题 3 秒出现验证框。
-- 输入 `8` 可以进入设置页。
-- 添加联系人后保存，主界面刷新。
-- 重启 App 后联系人仍然存在。
-- 选择头像后能在设置页和主界面显示。
-- 点击无号码联系人会提示号码未设置。
-- 点击有号码联系人会 TTS 播报并请求拨号权限。
-- 拒绝拨号权限后会打开系统拨号盘。
+- GitHub Actions uploads `jianhu-call-debug-apk`.
+- The artifact contains `jianhu-call-debug.apk`.
+- First launch shows default contact cards.
+- Long-pressing the title for 3 seconds enters Settings directly.
+- Adding a contact and saving refreshes the main screen.
+- `Up` / `Down` changes contact order.
+- Leaving Settings with unsaved edits asks for confirmation.
+- Android back button on Settings uses the same unsaved-edits confirmation.
+- Empty contact list shows a setup hint.
+- Restarting the app keeps saved contacts.
+- Avatar selection appears on the settings page and main screen.
+- Tapping a contact without a phone number shows a warning.
+- Tapping a contact with a phone number triggers TTS and a 1-second cancel dialog.
+- Not cancelling requests call permission or starts the call.
+- Denying call permission shows a fallback message and opens the system dialer.

@@ -13,7 +13,7 @@ class InitialDrawable extends Drawable {
     private final Paint label = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     InitialDrawable(String name) {
-        text = name == null || name.isEmpty() ? "家" : name.substring(0, 1);
+        text = name == null || name.isEmpty() ? "\u5bb6" : name.substring(0, 1);
         fill.setColor(Color.argb(235, 238, 243, 238));
         stroke.setStyle(Paint.Style.STROKE);
         stroke.setStrokeWidth(3f);

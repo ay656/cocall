@@ -40,7 +40,7 @@ class Contact {
         if (displayName != null && !displayName.trim().isEmpty()) {
             return displayName.trim();
         }
-        return "家人";
+        return "\u5bb6\u4eba";
     }
 
     private static String safe(String value) {

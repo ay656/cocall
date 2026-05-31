@@ -33,8 +33,24 @@ jobs:
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
 
+      - name: Collect APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          APK_PATH="$(find app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found under app/build/outputs/apk"
+            find app/build -maxdepth 5 -type f | sort
+            exit 1
+          fi
+          echo "Found APK: $APK_PATH"
+          cp "$APK_PATH" release/jianhu-call-debug.apk
+          ls -lh release
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: jianhu-call-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: release/jianhu-call-debug.apk
+          if-no-files-found: error

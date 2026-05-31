@@ -65,9 +65,9 @@ class ContactStore {
 
     private List<Contact> defaults() {
         List<Contact> contacts = new ArrayList<>();
-        contacts.add(make("daughter", "女儿", "小雨", 1));
-        contacts.add(make("spouse", "老伴", "", 2));
-        contacts.add(make("son", "儿子", "小明", 3));
+        contacts.add(make("daughter", "\u5973\u513f", "\u5c0f\u96e8", 1));
+        contacts.add(make("spouse", "\u8001\u4f34", "", 2));
+        contacts.add(make("son", "\u513f\u5b50", "\u5c0f\u660e", 3));
         return contacts;
     }
 
