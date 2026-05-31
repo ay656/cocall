@@ -99,6 +99,13 @@ public class MainActivity extends Activity {
         root.setPadding(dp(18), dp(12), dp(18), dp(10));
         setContentView(root);
 
+        root.setAlpha(0f);
+        root.setTranslationY(dp(8));
+        root.animate().alpha(1f).translationY(0f)
+                .setDuration(220)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .start();
+
         TextView title = new TextView(this);
         title.setText(APP_TITLE);
         title.setTextSize(32);
@@ -291,28 +298,92 @@ public class MainActivity extends Activity {
 
     private void showCallCountdown(Contact contact, String phone) {
         final boolean[] shouldDial = {true};
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("\u6b63\u5728\u547c\u53eb " + contact.primaryName())
-                .setMessage("\u5373\u5c06\u62e8\u53f7\uff0c\u70b9\u51fb\u53d6\u6d88\u53ef\u505c\u6b62\u3002")
-                .setNegativeButton("\u53d6\u6d88", (d, which) -> {
-                    shouldDial[0] = false;
-                    resetCallState();
-                })
-                .create();
+        final int[] countdown = {3};
+
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setGravity(Gravity.CENTER);
+        panel.setPadding(dp(32), dp(28), dp(32), dp(28));
+        panel.setBackground(new GlassDrawable(dp(32)));
+        dialog.setContentView(panel);
+
+        TextView countText = new TextView(this);
+        countText.setText("3");
+        countText.setTextSize(52);
+        countText.setTextColor(Color.rgb(30, 38, 38));
+        countText.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        countText.setGravity(Gravity.CENTER);
+        panel.addView(countText, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, dp(70)));
+
+        TextView nameText = new TextView(this);
+        nameText.setText(contact.primaryName());
+        nameText.setTextSize(28);
+        nameText.setTextColor(Color.rgb(26, 33, 33));
+        nameText.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        nameText.setGravity(Gravity.CENTER);
+        panel.addView(nameText, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(44)));
+
+        TextView hintText = new TextView(this);
+        hintText.setText("\u5373\u5c06\u62e8\u53f7...");
+        hintText.setTextSize(16);
+        hintText.setTextColor(Color.argb(160, 55, 63, 63));
+        hintText.setGravity(Gravity.CENTER);
+        panel.addView(hintText, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(36)));
+
+        Button cancelBtn = new Button(this);
+        cancelBtn.setText("\u53d6\u6d88");
+        cancelBtn.setTextSize(17);
+        cancelBtn.setAllCaps(false);
+        cancelBtn.setTextColor(Color.rgb(180, 55, 55));
+        cancelBtn.setBackground(new GlassDrawable(dp(22)));
+        cancelBtn.setPadding(dp(28), dp(12), dp(28), dp(12));
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, dp(48));
+        btnParams.setMargins(0, dp(16), 0, 0);
+        panel.addView(cancelBtn, btnParams);
+
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(
+                Color.argb(80, 0, 0, 0)));
+        dialog.getWindow().setLayout(dp(280), ViewGroup.LayoutParams.WRAP_CONTENT);
+
         dialog.setOnCancelListener(d -> {
             shouldDial[0] = false;
             resetCallState();
         });
+        cancelBtn.setOnClickListener(v -> {
+            shouldDial[0] = false;
+            dialog.dismiss();
+            resetCallState();
+        });
         dialog.show();
 
-        handler.postDelayed(() -> {
-            if (!shouldDial[0]) {
-                return;
+        Runnable tick = new Runnable() {
+            @Override
+            public void run() {
+                if (!shouldDial[0]) return;
+                countdown[0]--;
+                if (countdown[0] <= 0) {
+                    dialog.dismiss();
+                    dial(contact, phone);
+                    handler.postDelayed(MainActivity.this::resetCallState, 1200L);
+                    return;
+                }
+                countText.setText(String.valueOf(countdown[0]));
+                countText.animate().scaleX(1.3f).scaleY(1.3f).setDuration(100)
+                        .withEndAction(() -> countText.animate().scaleX(1f).scaleY(1f).setDuration(150).start())
+                        .start();
+                handler.postDelayed(this, 1000);
             }
-            dialog.dismiss();
-            dial(contact, phone);
-            handler.postDelayed(this::resetCallState, 1200L);
-        }, CALL_DELAY_MS);
+        };
+        handler.postDelayed(tick, 1000);
     }
 
     private void resetCallState() {
@@ -359,6 +430,13 @@ public class MainActivity extends Activity {
         root.setBackground(new MistBackgroundDrawable());
         root.setPadding(dp(14), dp(12), dp(14), dp(12));
         setContentView(root);
+
+        root.setAlpha(0f);
+        root.setTranslationY(dp(8));
+        root.animate().alpha(1f).translationY(0f)
+                .setDuration(220)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .start();
 
         LinearLayout top = new LinearLayout(this);
         top.setOrientation(LinearLayout.HORIZONTAL);
