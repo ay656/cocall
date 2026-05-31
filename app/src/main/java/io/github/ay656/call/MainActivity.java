@@ -148,6 +148,7 @@ public class MainActivity extends Activity {
         });
 
         ScrollView scrollView = new ScrollView(this);
+        scrollView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         LinearLayout list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
         list.setPadding(0, dp(8), 0, dp(8));
@@ -162,24 +163,32 @@ public class MainActivity extends Activity {
             LinearLayout emptyBox = new LinearLayout(this);
             emptyBox.setOrientation(LinearLayout.VERTICAL);
             emptyBox.setGravity(Gravity.CENTER);
-            emptyBox.setPadding(dp(18), dp(24), dp(18), dp(24));
-            emptyBox.setBackground(new GlassDrawable(dp(24)));
+            emptyBox.setPadding(dp(22), dp(28), dp(22), dp(28));
+            emptyBox.setBackground(new GlassDrawable(dp(28)));
 
-            TextView emptyTitle = text("\u8bf7\u5bb6\u4eba\u5148\u8bbe\u7f6e\u8054\u7cfb\u4eba", 25, true);
+            TextView peopleIcon = new TextView(this);
+            peopleIcon.setText("\uD83D\uDC65");
+            peopleIcon.setTextSize(44);
+            peopleIcon.setGravity(Gravity.CENTER);
+            emptyBox.addView(peopleIcon, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dp(62)));
+
+            TextView emptyTitle = text("\u8fd8\u6ca1\u6709\u8054\u7cfb\u4eba", 26, true);
             emptyTitle.setGravity(Gravity.CENTER);
-            TextView emptyHint = text("\u957f\u6309\u9876\u90e8\u6807\u9898 3 \u79d2\u8fdb\u5165\u8bbe\u7f6e", 17, false);
+            TextView emptyHint = text("\u957f\u6309\u9876\u90e8\u300c\u7b80\u547c\u300d3 \u79d2\u8fdb\u5165\u8bbe\u7f6e", 17, false);
             emptyHint.setGravity(Gravity.CENTER);
             emptyHint.setTextColor(Color.argb(180, 52, 58, 58));
             emptyBox.addView(emptyTitle, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    dp(58)));
+                    dp(52)));
             emptyBox.addView(emptyHint, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     dp(42)));
 
             LinearLayout.LayoutParams emptyParams = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    dp(168));
+                    dp(210));
             emptyParams.setMargins(0, dp(18), 0, 0);
             list.addView(emptyBox, emptyParams);
         } else {
@@ -456,6 +465,7 @@ public class MainActivity extends Activity {
         top.addView(save, new LinearLayout.LayoutParams(dp(100), dp(46)));
 
         ScrollView scroll = new ScrollView(this);
+        scroll.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         settingsList = new LinearLayout(this);
         settingsList.setOrientation(LinearLayout.VERTICAL);
         settingsList.setPadding(0, dp(10), 0, dp(8));
@@ -804,7 +814,12 @@ public class MainActivity extends Activity {
         if (inSettings) {
             leaveSettings();
         } else {
-            super.onBackPressed();
+            new AlertDialog.Builder(this)
+                    .setTitle("\u786e\u5b9a\u9000\u51fa\uff1f")
+                    .setMessage("\u9000\u51fa\u540e\u9700\u8981\u91cd\u65b0\u6253\u5f00\u7b80\u547c\u3002")
+                    .setNegativeButton("\u7559\u5728\u7b80\u547c", null)
+                    .setPositiveButton("\u9000\u51fa", (dialog, which) -> finish())
+                    .show();
         }
     }
 
