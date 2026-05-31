@@ -31,10 +31,19 @@ jobs:
           packages: "platform-tools platforms;android-35 build-tools;35.0.0"
 
       - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Show APKs (debug)
+        run: |
+          echo "Listing app/build/outputs:"
+          ls -la app/build/outputs || true
+          echo "Find apk files:"
+          find app/build/outputs -type f -name "*.apk" -print || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: jianhu-call-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/**/*.apk
