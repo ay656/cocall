@@ -359,9 +359,6 @@ public class MainActivity extends Activity {
         if (checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             startActivity(callIntent);
         } else {
-            Toast.makeText(this,
-                    "\u9700\u8981\u62e8\u53f7\u6743\u9650\uff0c\u7528\u4e8e\u76f4\u63a5\u547c\u53eb\u5bb6\u4eba",
-                    Toast.LENGTH_LONG).show();
             requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CALL_PERMISSION);
         }
     }
@@ -464,24 +461,24 @@ public class MainActivity extends Activity {
         card.setPadding(dp(16), dp(14), dp(16), dp(14));
         card.setBackground(new GlassDrawable(dp(24)));
 
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        card.addView(row, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(156)));
+        LinearLayout avatarRow = new LinearLayout(this);
+        avatarRow.setOrientation(LinearLayout.HORIZONTAL);
+        avatarRow.setGravity(Gravity.CENTER);
+        card.addView(avatarRow, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         LinearLayout avatarBox = new LinearLayout(this);
         avatarBox.setOrientation(LinearLayout.VERTICAL);
         avatarBox.setGravity(Gravity.CENTER);
-        row.addView(avatarBox, new LinearLayout.LayoutParams(dp(106), dp(156)));
+        avatarRow.addView(avatarBox, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         ImageButton avatar = new ImageButton(this);
         avatar.setBackgroundColor(Color.TRANSPARENT);
         avatar.setBackground(new GlassDrawable(dp(48)));
         loadAvatarOrFallback(avatar, contact);
         avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        avatarBox.addView(avatar, new LinearLayout.LayoutParams(dp(92), dp(92)));
+        avatarBox.addView(avatar, new LinearLayout.LayoutParams(dp(88), dp(88)));
 
         TextView avatarHint = new TextView(this);
         avatarHint.setText("\u70b9\u51fb\u66f4\u6362");
@@ -489,51 +486,36 @@ public class MainActivity extends Activity {
         avatarHint.setTextColor(Color.argb(140, 60, 68, 68));
         avatarHint.setGravity(Gravity.CENTER);
         avatarBox.addView(avatarHint, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(22)));
-
-        LinearLayout fields = new LinearLayout(this);
-        fields.setOrientation(LinearLayout.VERTICAL);
-        fields.setPadding(dp(14), 0, 0, 0);
-        row.addView(fields, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+                ViewGroup.LayoutParams.WRAP_CONTENT, dp(22)));
 
         TextView labelName = new TextView(this);
         labelName.setText("\u79f0\u8c13");
         labelName.setTextSize(13);
         labelName.setTextColor(Color.argb(160, 48, 56, 56));
-        labelName.setPadding(0, 0, 0, dp(4));
-        fields.addView(labelName);
+        labelName.setPadding(0, dp(8), 0, dp(4));
+        card.addView(labelName);
 
         EditText name = input("\u4f8b\u5982\uff1a\u5973\u513f", contact.name, InputType.TYPE_CLASS_TEXT);
-
-        TextView labelDisp = new TextView(this);
-        labelDisp.setText("\u59d3\u540d\uff08\u53ef\u9009\uff09");
-        labelDisp.setTextSize(13);
-        labelDisp.setTextColor(Color.argb(160, 48, 56, 56));
-        labelDisp.setPadding(0, dp(8), 0, dp(4));
-        fields.addView(labelDisp);
-
-        EditText displayName = input("\u771f\u5b9e\u59d3\u540d", contact.displayName, InputType.TYPE_CLASS_TEXT);
+        card.addView(name, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         TextView labelPhone = new TextView(this);
         labelPhone.setText("\u7535\u8bdd");
         labelPhone.setTextSize(13);
         labelPhone.setTextColor(Color.argb(160, 48, 56, 56));
         labelPhone.setPadding(0, dp(8), 0, dp(4));
-        fields.addView(labelPhone);
+        card.addView(labelPhone);
 
-        EditText phone = input("\u7535\u8bdd\u53f7\u7801", contact.phone, InputType.TYPE_CLASS_PHONE);
+        EditText phone = input("\u624b\u673a\u53f7\u7801", contact.phone, InputType.TYPE_CLASS_PHONE);
+        card.addView(phone, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         attachDirtyWatcher(name);
-        attachDirtyWatcher(displayName);
         attachDirtyWatcher(phone);
-        fields.addView(name);
-        fields.addView(displayName);
-        fields.addView(phone);
 
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);
         actions.setGravity(Gravity.CENTER_VERTICAL);
-        actions.setPadding(0, dp(2), 0, 0);
+        actions.setPadding(0, dp(4), 0, 0);
         card.addView(actions, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 dp(52)));
@@ -548,12 +530,6 @@ public class MainActivity extends Activity {
         name.setOnFocusChangeListener((view, hasFocus) -> {
             if (!hasFocus) {
                 contact.name = name.getText().toString();
-                settingsDirty = true;
-            }
-        });
-        displayName.setOnFocusChangeListener((view, hasFocus) -> {
-            if (!hasFocus) {
-                contact.displayName = displayName.getText().toString();
                 settingsDirty = true;
             }
         });
@@ -587,14 +563,14 @@ public class MainActivity extends Activity {
                 })
                 .show());
 
-        card.setTag(new EditorRefs(contact, name, displayName, phone));
+        card.setTag(new EditorRefs(contact, name, phone));
         return card;
     }
 
     private LinearLayout.LayoutParams editorLayoutParams() {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(258));
+                ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 0, 0, dp(14));
         return params;
     }
@@ -615,7 +591,10 @@ public class MainActivity extends Activity {
         if (!syncEditorInputs(true)) {
             return;
         }
-        store.save(contacts);
+        if (!store.save(contacts)) {
+            Toast.makeText(this, "\u4fdd\u5b58\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5", Toast.LENGTH_LONG).show();
+            return;
+        }
         settingsDirty = false;
         Toast.makeText(this, "\u5df2\u4fdd\u5b58", Toast.LENGTH_SHORT).show();
         showMain();
@@ -631,17 +610,10 @@ public class MainActivity extends Activity {
             if (tag instanceof EditorRefs) {
                 EditorRefs refs = (EditorRefs) tag;
                 refs.contact.name = refs.name.getText().toString().trim();
-                refs.contact.displayName = refs.displayName.getText().toString().trim();
                 refs.contact.phone = normalizePhone(refs.phone.getText().toString());
                 if (requireName && refs.contact.name.isEmpty()) {
                     Toast.makeText(this,
                             "\u8bf7\u586b\u5199\u6bcf\u4e2a\u8054\u7cfb\u4eba\u7684\u79f0\u8c13",
-                            Toast.LENGTH_LONG).show();
-                    return false;
-                }
-                if (requireName && !refs.contact.phone.isEmpty() && !isValidPhone(refs.contact.phone)) {
-                    Toast.makeText(this,
-                            refs.contact.primaryName() + " \u7684\u53f7\u7801\u683c\u5f0f\u4e0d\u6b63\u786e",
                             Toast.LENGTH_LONG).show();
                     return false;
                 }
@@ -813,13 +785,11 @@ public class MainActivity extends Activity {
     private static class EditorRefs {
         final Contact contact;
         final EditText name;
-        final EditText displayName;
         final EditText phone;
 
-        EditorRefs(Contact contact, EditText name, EditText displayName, EditText phone) {
+        EditorRefs(Contact contact, EditText name, EditText phone) {
             this.contact = contact;
             this.name = name;
-            this.displayName = displayName;
             this.phone = phone;
         }
     }

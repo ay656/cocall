@@ -48,7 +48,7 @@ class ContactStore {
         }
     }
 
-    void save(List<Contact> contacts) {
+    boolean save(List<Contact> contacts) {
         JSONArray array = new JSONArray();
         for (int i = 0; i < contacts.size(); i++) {
             try {
@@ -59,7 +59,10 @@ class ContactStore {
 
         try (FileOutputStream output = new FileOutputStream(file, false)) {
             output.write(array.toString(2).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException | JSONException ignored) {
+            return true;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
