@@ -8,17 +8,23 @@ import android.graphics.drawable.Drawable;
 
 class InitialDrawable extends Drawable {
     private final String text;
+    private final int fillColor;
     private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint label = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     InitialDrawable(String name) {
+        this(name, 0);
+    }
+
+    InitialDrawable(String name, int color) {
         text = name == null || name.isEmpty() ? "\u5bb6" : name.substring(0, 1);
-        fill.setColor(Color.argb(235, 238, 243, 238));
+        fillColor = color != 0 ? color : Color.argb(235, 238, 243, 238);
+        fill.setColor(fillColor);
         stroke.setStyle(Paint.Style.STROKE);
         stroke.setStrokeWidth(3f);
         stroke.setColor(Color.argb(210, 255, 255, 255));
-        label.setColor(Color.rgb(48, 55, 55));
+        label.setColor(Color.argb(180, 48, 55, 55));
         label.setTextAlign(Paint.Align.CENTER);
         label.setFakeBoldText(true);
     }
@@ -32,7 +38,7 @@ class InitialDrawable extends Drawable {
         canvas.drawCircle(cx, cy, radius, fill);
         canvas.drawCircle(cx, cy, radius, stroke);
 
-        label.setTextSize(radius * 0.98f);
+        label.setTextSize(radius * 0.95f);
         Paint.FontMetrics metrics = label.getFontMetrics();
         float y = cy - (metrics.ascent + metrics.descent) / 2f;
         canvas.drawText(text, cx, y, label);

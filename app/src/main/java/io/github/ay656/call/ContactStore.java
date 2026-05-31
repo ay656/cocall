@@ -65,19 +65,20 @@ class ContactStore {
 
     private List<Contact> defaults() {
         List<Contact> contacts = new ArrayList<>();
-        contacts.add(make("daughter", "\u5973\u513f", "\u5c0f\u96e8", 1));
-        contacts.add(make("spouse", "\u8001\u4f34", "", 2));
-        contacts.add(make("son", "\u513f\u5b50", "\u5c0f\u660e", 3));
+        contacts.add(make("daughter", "\u5973\u513f", "\u5c0f\u96e8", 1, 0xFFE8B4B8));
+        contacts.add(make("spouse", "\u8001\u4f34", "", 2, 0xFF90C4D8));
+        contacts.add(make("son", "\u513f\u5b50", "\u5c0f\u660e", 3, 0xFF8DBFAC));
         return contacts;
     }
 
-    private Contact make(String id, String name, String displayName, int sort) {
+    private Contact make(String id, String name, String displayName, int sort, int color) {
         Contact contact = new Contact();
         contact.id = id;
         contact.name = name;
         contact.displayName = displayName;
         contact.phone = "";
         contact.avatarUri = "";
+        contact.avatarColor = color;
         contact.sort = sort;
         return contact;
     }

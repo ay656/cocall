@@ -9,6 +9,7 @@ class Contact {
     String displayName;
     String phone;
     String avatarUri;
+    int avatarColor;
     int sort;
 
     static Contact fromJson(JSONObject object, int fallbackSort) throws JSONException {
@@ -18,6 +19,7 @@ class Contact {
         contact.displayName = object.optString("displayName", "");
         contact.phone = object.optString("phone", "");
         contact.avatarUri = object.optString("avatarUri", "");
+        contact.avatarColor = object.optInt("avatarColor", 0);
         contact.sort = object.optInt("sort", fallbackSort);
         return contact;
     }
@@ -29,6 +31,7 @@ class Contact {
         object.put("displayName", safe(displayName));
         object.put("phone", safe(phone));
         object.put("avatarUri", safe(avatarUri));
+        object.put("avatarColor", avatarColor);
         object.put("sort", index);
         return object;
     }

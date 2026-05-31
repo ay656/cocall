@@ -45,6 +45,9 @@ public class MainActivity extends Activity {
     private static final String FOOTER_IDLE = "\u8f7b\u70b9\u5bb6\u4eba\u5373\u53ef\u62e8\u6253";
     private static final String TAP_TO_CALL = "\u8f7b\u70b9\u5373\u53ef\u547c\u53eb";
     private static final String NO_NUMBER_SPEAK = "\u53f7\u7801\u8fd8\u6ca1\u6709\u8bbe\u7f6e\uff0c\u8bf7\u8ba9\u5bb6\u4eba\u5e2e\u5fd9\u8bbe\u7f6e\u3002";
+    private static final int[] AVATAR_COLORS = {
+            0xFFE8B4B8, 0xFF90C4D8, 0xFF8DBFAC, 0xFFC4B0D4, 0xFFECC4A0, 0xFFB0C4CC
+    };
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable openSettingsRunnable = this::showSettings;
@@ -191,8 +194,31 @@ public class MainActivity extends Activity {
         card.setOrientation(LinearLayout.HORIZONTAL);
         card.setGravity(Gravity.CENTER_VERTICAL);
         card.setPadding(dp(18), 0, dp(16), 0);
-        card.setBackground(new GlassDrawable(dp(28)));
+        GlassDrawable cardBg = new GlassDrawable(dp(28));
+        card.setBackground(cardBg);
         card.setClickable(true);
+        card.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        cardBg.setPressed(true);
+                        card.setScaleX(0.97f);
+                        card.setScaleY(0.97f);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        cardBg.setPressed(false);
+                        card.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        card.performClick();
+                        return true;
+                    case MotionEvent.ACTION_CANCEL:
+                        cardBg.setPressed(false);
+                        card.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        return true;
+                }
+                return false;
+            }
+        });
         card.setOnClickListener(view -> startCall(contact));
 
         ImageView avatar = avatarView(contact, dp(76));
@@ -238,7 +264,7 @@ public class MainActivity extends Activity {
         if (contact.avatarUri != null && !contact.avatarUri.isEmpty()) {
             avatar.setImageURI(Uri.parse(contact.avatarUri));
         } else {
-            avatar.setImageDrawable(new InitialDrawable(contact.primaryName()));
+            avatar.setImageDrawable(new InitialDrawable(contact.primaryName(), contact.avatarColor));
         }
         avatar.setLayoutParams(new LinearLayout.LayoutParams(size, size));
         return avatar;
@@ -376,6 +402,7 @@ public class MainActivity extends Activity {
             contact.displayName = "";
             contact.phone = "";
             contact.avatarUri = "";
+            contact.avatarColor = AVATAR_COLORS[contacts.size() % AVATAR_COLORS.length];
             contacts.add(contact);
             settingsDirty = true;
             renderSettingsList();
@@ -416,7 +443,7 @@ public class MainActivity extends Activity {
         if (contact.avatarUri != null && !contact.avatarUri.isEmpty()) {
             avatar.setImageURI(Uri.parse(contact.avatarUri));
         } else {
-            avatar.setImageDrawable(new InitialDrawable(contact.primaryName()));
+            avatar.setImageDrawable(new InitialDrawable(contact.primaryName(), contact.avatarColor));
         }
         avatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
         avatarBox.addView(avatar, new LinearLayout.LayoutParams(dp(92), dp(92)));
